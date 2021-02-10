@@ -1,0 +1,70 @@
+from bs4 import BeautifulSoup
+from urllib.request import urlopen, Request
+import requests
+
+targets = ['https://www.passeidireto.com/arquivo/19865741/principios-basicos-de-organizacao-de-bibliotecas-e-de-acesso-a-informacao-digita/4',
+'https://www.vocerealmentesabia.com/2013/07/cachorro-mais-musculoso-do-mundo.html',
+'http://blogdowilsonpessoa.blogspot.com/2013/07/cachorro-mais-musculoso-do-mundo.html',
+'http://hazardoushackers.blogspot.com/p/hackeando-internet-wireless.html',
+'https://adrenaline.com.br/forum/threads/skyfire-navegador-para-celular-com-java-e-outras-funcoes.279085/',
+'https://deskinfo.wordpress.com/2009/03/18/entenda-o-que-trackers-seeds-e-peers/',
+'http://informaragora.blogspot.com/2009/10/2900-jogos-java-celular-20000-programas.html',
+'http://saladadiaria.blogspot.com/2009/11/cachorro-mosculoso.html',
+'http://vieouviporai.blogspot.com/2013/02/meninas-hoje-eu-vim-falar-de-algo-bem.html',
+'https://www.clancobra.com.br/2012/11/qual-o-melhor-antivirus-para-celular-e-tablet-melhor-app-anti-virus-android/',
+'http://deviltherock.blogspot.com/p/h4ck3r.html']
+
+def domainReturn(link):
+    try:
+        domain = link.split('/')[2]
+        if ((domain.split('.')[0] == 'www') or (domain.split('.')[0] == 'www2') or (domain.split('.')[0] == 'www1')  or (domain.split('.')[0] == 'www12')) :
+            return domain.split('.')[1]  
+        return domain.split('.')[0]
+    except:
+        return '#'
+
+stopList = [
+    '#',
+    '#page',
+    'pt-br',
+    'itunes',
+    'boostingads',
+    'statcounter',
+    'conta',
+    'servedby',
+    'anuncie',
+    'feeds',
+    'whatsapp',
+    'xyzscripts',
+    'facebook',
+    'admin',
+    'app',
+    'magonedemo',
+    'wpbloggertemplates',
+    'twitter',
+    'linkedin',
+    'pinterest',
+    'youtube',
+    'instagram',
+    'support',
+    'blogger',
+    'plus',
+    'tumblr',
+    'wordpress',
+    'BRASIL'
+]
+
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
+
+for target in targets:
+    req = Request(url=target, headers=headers)
+    html = urlopen(req).read()
+    soup = BeautifulSoup(html, 'html.parser')
+    links = soup.find_all('a')
+    for link in links:
+                try:
+                  dominio = domainReturn(link['href'])
+                  if dominio not in stopList:
+                    print(dominio)
+                except:
+                    print('Not working')
