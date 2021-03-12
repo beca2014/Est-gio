@@ -1,0 +1,77 @@
+from urllib.request import urlopen, Request
+from bs4 import BeautifulSoup
+import csv
+import nltk
+from sys import argv
+stopwords = nltk.corpus.stopwords.words('portuguese')
+
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
+
+def imprimeLista(lista, arquivo):
+    for elemento in lista:
+        escreveLista.write(elemento+"\n")
+
+def nomeDominio(link):
+    try:
+        dominio = link.split("/")[2]
+        if ((dominio.split('.')[0] == 'www') or (dominio.split('.')[0] == 'www2') or (dominio.split('.')[0] == 'www1')  or (dominio.split('.')[0] == 'www12')) :
+            return dominio.split(".")[1]
+        return dominio.split(".")[0]
+    except:
+        return "#"
+
+def pagPrincipal(link):
+    return link.split("/")[0]+"//"+link.split("/")[2]
+
+def retiraPontuacao(texto):
+    caracteres = ['.', ',', '”', '“', ':', ';', '(', ')', '"', '!', '?', '’', '‘', "'", '*']
+    for caractere in caracteres:
+        texto = texto.replace(caractere, ' ')
+    return texto
+
+
+
+
+fontes = """
+    https://www.passeidireto.com/arquivo/19865741/principios-basicos-de-organizacao-de-bibliotecas-e-de-acesso-a-informacao-digita/4
+    https://www.vocerealmentesabia.com/2013/07/cachorro-mais-musculoso-do-mundo.html
+    http://blogdowilsonpessoa.blogspot.com/2013/07/cachorro-mais-musculoso-do-mundo.html
+    http://hazardoushackers.blogspot.com/p/hackeando-internet-wireless.html
+    https://adrenaline.com.br/forum/threads/skyfire-navegador-para-celular-com-java-e-outras-funcoes.279085/
+    https://deskinfo.wordpress.com/2009/03/18/entenda-o-que-trackers-seeds-e-peers/
+    http://informaragora.blogspot.com/2009/10/2900-jogos-java-celular-20000-programas.html
+    http://saladadiaria.blogspot.com/2009/11/cachorro-mosculoso.html
+    http://vieouviporai.blogspot.com/2013/02/meninas-hoje-eu-vim-falar-de-algo-bem.html
+    https://www.clancobra.com.br/2012/11/qual-o-melhor-antivirus-para-celular-e-tablet-melhor-app-anti-virus-android/
+    http://deviltherock.blogspot.com/p/h4ck3r.html
+    """
+    
+with open("listaTermos.txt", "w") as escreveLista:
+
+    sites = fontes.split("\npublicabrasil;")
+    sites.remove('')
+    for site in sites:
+        principal = pagPrincipal(site)
+        req = Request(url=principal, headers=headers)
+
+        escreveLista.write("Site:"+principal+"\n")
+        try:
+            html = urlopen(req).read()
+            soup = BeautifulSoup(html, 'html.parser')
+            paragrafos = soup.find_all('p')
+            texto = ""
+            for paragrafo in paragrafos:
+                texto+=paragrafo.getText()
+            texto = retiraPontuacao(texto)
+            palavras = texto.split(' ')
+            termos = []
+            for palavra in palavras:
+                if palavra not in stopwords and palavra != '':
+                    palavra = palavra.strip('"')
+                    termos.append(palavra)
+            imprimeLista(termos, escreveLista)
+
+
+        except:
+            escreveLista.write("Site inacessível.\n")
+        escreveLista.write("___________________________\n")
